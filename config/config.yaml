@@ -11,7 +11,7 @@ project:
 # The real pipeline reads class names straight from the checkpoint
 # (model.names, see predictor.predict_shelf) — that is the single source of
 # truth for label IDs. This list exists ONLY for demo mode (no weights loaded).
-# Kept in sync with the deployed model (yolo11m, nc: 35, empty_slot @ index 14).
+# Kept in sync with the deployed model (yolov8m, nc: 35, empty_slot @ index 14).
 classes:
   - algida_boom_gold
   - algida_klasik

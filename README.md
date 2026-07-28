@@ -1,6 +1,6 @@
 # 🍦 Ice Cream Shelf Detector (IceVision)
 
-> Algida/Unilever tipi dondurma dolaplarının raf fotoğraflarını YOLO11 ile analiz eden, ürün sayan ve dolum önerisi çıkaran bir bilgisayarlı görü hattı + Streamlit paneli.
+> Algida/Unilever tipi dondurma dolaplarının raf fotoğraflarını YOLOv8 ile analiz eden, ürün sayan ve dolum önerisi çıkaran bir bilgisayarlı görü hattı + Streamlit paneli.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.3-EE4C2C?logo=pytorch&logoColor=white)
@@ -31,7 +31,7 @@ flowchart TD
     B --> B2[skew_corrector.py\nkanonik yönelim]
 
     B2 --> C[Tespit]
-    C --> C1[predictor.py\nYOLO11m → kutular + sınıflar]
+    C --> C1[predictor.py\nYOLOv8m → kutular + sınıflar]
 
     C1 --> D[Izgara / Slot Analizi]
     D --> D1[shelf_grid.py\ntepsi köşeleri → homografi]
@@ -80,7 +80,7 @@ streamlit run dashboard/app.py
 # 3. http://localhost:8501 adresini açın ve bir raf fotoğrafı yükleyin
 ```
 
-> **Not:** `requirements.txt` içindeki sürümler kasıtlı olarak sabitlenmiştir (`torch==2.3.0`, `numpy==1.26.4`, `ultralytics>=8.4.96`). Deploy edilen `models/best.pt` bir YOLO8 (C3k2 blokları içeren) checkpoint'i olduğu için Ultralytics 8.2.x ile yüklenemez; Ultralytics'in daha yeni bir torch/numpy çekmesine izin vermeyin — Streamlit 1.35 ve scipy 1.13 `numpy<2` gerektirir. Ayrıntılar `requirements.txt` içindeki yorumlarda.
+> **Not:** `requirements.txt` içindeki sürümler kasıtlı olarak sabitlenmiştir (`torch==2.3.0`, `numpy==1.26.4`, `ultralytics>=8.4.96`). Deploy edilen `models/best.pt` bir YOLOv8m (C2f blokları içeren) checkpoint'i olduğu için Ultralytics 8.2.x ile yüklenemez; Ultralytics'in daha yeni bir torch/numpy çekmesine izin vermeyin — Streamlit 1.35 ve scipy 1.13 `numpy<2` gerektirir. Ayrıntılar `requirements.txt` içindeki yorumlarda.
 
 Eğitilmiş ağırlık (`models/best.pt`) yoksa panel demo modunda (sentetik tespitlerle) çalışmaya devam eder; hata fırlatmaz ama gerçek tespit yapmaz.
 
@@ -175,7 +175,8 @@ icecream-shelf-detector/
 │   └── pages/
 │       ├── 01_shelf_analysis.py    Tekli raf analizi
 │       ├── 02_batch_analysis.py    Toplu analiz + CSV
-│       └── 03_restock_planner.py   Dolum planlama
+│       └── _03_restock_planner.py  Dolum planlama (dosya adı "_" ile başladığı için
+│                                    Streamlit gezinme menüsünde şu an gizli/pasif)
 ├── qr_reader.py             Katmanlı QR decoder (zxing-cpp → WeChat → cv2) — raf kimliği doğrulama
 ├── notebooks/               EDA, eğitim denemeleri, hata analizi
 ├── tests/                   pytest test paketi (11 dosya)
