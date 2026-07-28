@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+venv.nosync/
+venv 2
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (large / potentially sensitive real shelf photos; store outside git)
+data/
+
+# Pretrained/base checkpoints — redownloadable, not custom-trained
+/yolov8n.pt
+
+# Model weights and training runs
+models/
+runs/
+archived_runs/
+
+# Reports and outputs
+reports/
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets / environment
+.env
+*.pem
+
+# Streamlit
+.streamlit/
+
+# pytest
+.pytest_cache/
+htmlcov/
+.coverage

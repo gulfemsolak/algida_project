@@ -1,0 +1,152 @@
+# ==============================================================================
+# Ice Cream Shelf Detector — Central Configuration
+# ==============================================================================
+
+project:
+  name: "IceCream Shelf Detector"
+  version: "1.0.0"
+  description: "AI-powered vending machine shelf analysis using YOLOv8"
+
+# ── Classes ──────────────────────────────────────────────────────────────────
+# The real pipeline reads class names straight from the checkpoint
+# (model.names, see predictor.predict_shelf) — that is the single source of
+# truth for label IDs. This list exists ONLY for demo mode (no weights loaded).
+# Kept in sync with the deployed model (yolo11m, nc: 35, empty_slot @ index 14).
+classes:
+  - algida_boom_gold
+  - algida_klasik
+  - algida_klasik_cikolata
+  - algida_plombir
+  - algida_volcano
+  - cornetto_beyaz_disk
+  - cornetto_cilek
+  - cornetto_findik_krema
+  - cornetto_fistik
+  - cornetto_karamel
+  - cornetto_kaymak
+  - cornetto_mango
+  - cornetto_milka
+  - cornetto_oreo
+  - empty_slot
+  - frigola_bar
+  - frigola_klasik
+  - magnum_ahududu
+  - magnum_badem
+  - magnum_beyaz
+  - magnum_cookie
+  - magnum_double_cikolata
+  - magnum_dubai
+  - magnum_karadut
+  - magnum_karamel
+  - magnum_klasik
+  - magnum_sandwich_badem
+  - magnum_signature_fistik
+  - maras_usulu_kutu
+  - nogger_karamel
+  - nogger_vanilya
+  - twister_kavun
+  - twister_ocean
+  - twister_orman
+  - viennetta
+
+num_classes: 35
+
+# ── Training Hyperparameters ─────────────────────────────────────────────────
+training:
+  epochs: 100
+  batch_size: 16
+  img_size: 640
+  patience: 20          # early-stopping patience
+  lr0: 0.01             # initial learning rate
+  lrf: 0.01             # final learning rate (lr0 * lrf)
+  momentum: 0.937
+  weight_decay: 0.0005
+  warmup_epochs: 3
+  warmup_momentum: 0.8
+  warmup_bias_lr: 0.1
+  box: 7.5              # box loss gain
+  cls: 0.5              # classification loss gain
+  dfl: 1.5              # distribution focal loss gain
+  workers: 8
+  seed: 42
+  save_period: 10       # save checkpoint every N epochs
+  val: true             # validate during training
+  plots: true
+
+# ── Model Variants ───────────────────────────────────────────────────────────
+models:
+  variants:
+    - yolov8n            # nano  — fastest, smallest
+    - yolov8s            # small — balanced
+    - yolov8m            # medium — most accurate
+  default: yolov8m
+
+# ── Inference ────────────────────────────────────────────────────────────────
+inference:
+  # Explicit path to the deployed weights. The dashboard loads exactly this file
+  # (no size/heuristic auto-discovery). If it is missing the app surfaces an
+  # error rather than silently falling back to demo detections.
+  weights_path: "models/best.pt"
+  conf_threshold: 0.5    # single global confidence cutoff for ALL classes
+  iou_threshold: 0.45
+  max_det: 300
+  device: ""            # "" = auto-select (CUDA if available, else CPU)
+
+# ── Shelf Analysis ───────────────────────────────────────────────────────────
+shelf_analysis:
+  restock_threshold: 0.5       # fill rate below this triggers restock alert
+  row_cluster_eps: 50          # pixels — DBSCAN epsilon for row detection
+  low_confidence_threshold: 0.4  # detections below this flagged as anomalies
+  empty_slot_restock_count: 3    # n empty slots → restock needed
+
+# ── Slot Analysis ────────────────────────────────────────────────────────────
+# Tespitleri soldan sağa sütunlara (slot) ayıran katman. Bir fotoğraf = bir raf.
+# Sınıf bazlı sayımın ÜSTÜNE oturur, onu değiştirmez. Bkz. src/analysis/slot_assigner.py
+slot_analysis:
+  column_count: 7            # freezer'ın sütun sayısı — bu dolapta 7 şerit (ekran: 31..37)
+  id_scheme: "shelf_col"     # "shelf_col" -> raf 1: 11,12,...,16 | "twin" -> 11,22,...,66
+  default_shelf_number: 1    # operatör seçmezse kullanılacak raf numarası
+  empty_slot_class_id: 14    # sınıf listesinde empty_slot index'i
+  # ── Yönelim ── yalnız EXIF Orientation'a göre 90° katı döndürme; içerik tabanlı
+  # tahmin yok. Kalan perspektif shelf_grid homografisiyle (tepsi 4 köşesi) düzeltilir.
+  auto_rotate: true          # EXIF varsa uygula; false = hiç döndürme (teşhis/karşılaştırma için)
+
+# ── Paths ────────────────────────────────────────────────────────────────────
+paths:
+  data_root: "data"
+  raw_images: "data/raw"
+  augmented: "data/augmented"
+  annotations: "data/annotations"
+  splits: "data/splits"
+  models_dir: "models"
+  runs_dir: "runs"
+  reports_dir: "reports"
+  logs_dir: "logs"
+
+# ── Dataset Splits ───────────────────────────────────────────────────────────
+dataset:
+  train_ratio: 0.70
+  val_ratio: 0.20
+  test_ratio: 0.10
+  random_seed: 42
+
+# ── Augmentation ─────────────────────────────────────────────────────────────
+augmentation:
+  num_augmented_per_image: 5
+  brightness_limit: 0.3
+  contrast_limit: 0.3
+  blur_limit: 3
+  noise_var_limit: [10, 50]
+  rotation_limit: 10
+  hue_shift_limit: 20
+  sat_shift_limit: 30
+  val_shift_limit: 20
+  shadow_num_shadows_lower: 1
+  shadow_num_shadows_upper: 2
+
+# ── Dashboard ────────────────────────────────────────────────────────────────
+dashboard:
+  title: "Ice Cream Shelf Analyzer"
+  default_confidence: 0.5
+  page_icon: "🍦"
+  layout: "wide"

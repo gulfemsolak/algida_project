@@ -1,0 +1,62 @@
+# Core ML / detection
+# The deployed model (models/best.pt) is a yolo11m checkpoint trained with
+# ultralytics 8.4.96; its C3k2 blocks don't exist in 8.2.x, so that version
+# fails to load it. Keep torch pinned — do NOT let ultralytics pull a newer
+# torch. Verified: 8.4.96 loads best.pt and runs inference on torch 2.3.0.
+ultralytics>=8.4.96
+torch==2.3.0
+torchvision==0.18.0
+
+# Computer vision
+# opencv-contrib (not plain opencv-python) — its extra modules include the WeChat
+# QR detector (cv2.wechat_qrcode), a secondary QR decoder. Same cv2 4.9 API.
+opencv-contrib-python==4.9.0.80
+Pillow==10.3.0
+albumentations==1.4.6
+
+# QR decoding — zxing-cpp is the primary QR reader (most robust on the small,
+# low-contrast, JPEG-compressed QR labels on vending shelves). Pure wheel, no
+# system libs. WeChat (opencv-contrib) + cv2.QRCodeDetector are fallbacks.
+zxing-cpp==3.1.0
+
+# Data science
+# MUST stay <2: ultralytics 8.4.x will happily pull numpy 2.x, but streamlit
+# 1.35.0 (numpy<2) and scipy 1.13.0 (numpy<2.3) both break under it.
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.4.2
+scipy==1.13.0
+
+# Visualisation & dashboard
+streamlit==1.35.0
+plotly==5.22.0
+matplotlib==3.9.0
+seaborn==0.13.2
+
+# Configuration
+pyyaml==6.0.1
+
+# Web scraping
+requests==2.32.3
+beautifulsoup4==4.12.3
+Pillow==10.3.0
+
+# CLI utilities
+click==8.1.7
+
+# Reporting
+jinja2==3.1.4
+weasyprint==62.1         # HTML → PDF (optional, requires system libs)
+
+# Testing
+pytest==8.2.2
+pytest-cov==5.0.0
+
+# Notebooks
+jupyter==1.0.0
+ipykernel==6.29.4
+ipywidgets==8.1.3
+
+# Utilities
+tqdm==4.66.4
+python-dateutil==2.9.0.post0

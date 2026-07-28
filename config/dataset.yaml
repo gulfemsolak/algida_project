@@ -1,0 +1,11 @@
+path: /private/var/folders/8k/597xttkx6yzd6c0yfyv2wdrw0000gn/T/pytest-of-gulfemsolak/pytest-8/test_build_dataset_yaml_genera0/splits
+train: images/train
+val: images/val
+test: images/test
+nc: 5
+names:
+  0: class_0
+  1: class_1
+  2: class_2
+  3: class_3
+  4: class_4
