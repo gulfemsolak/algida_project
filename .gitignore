@@ -20,13 +20,13 @@ venv 2
 .ipynb_checkpoints/
 
 # Data (large / potentially sensitive real shelf photos; store outside git)
-data/
+/data/
 
 # Pretrained/base checkpoints — redownloadable, not custom-trained
 /yolov8n.pt
 
 # Model weights and training runs
-models/
+/models/
 runs/
 archived_runs/
 
