@@ -47,9 +47,6 @@ Thumbs.db
 .env
 *.pem
 
-# Streamlit
-.streamlit/
-
 # pytest
 .pytest_cache/
 htmlcov/
