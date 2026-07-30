@@ -80,6 +80,12 @@ streamlit run dashboard/app.py
 # 3. http://localhost:8501 adresini açın ve bir raf fotoğrafı yükleyin
 ```
 
+Sonraki her açılışta (venv zaten kurulu), tek satırda aktivasyon + başlatma:
+
+```bash
+source venv/bin/activate && streamlit run dashboard/app.py
+```
+
 > **Not:** `requirements.txt` içindeki sürümler kasıtlı olarak sabitlenmiştir (`torch==2.3.0`, `numpy==1.26.4`, `ultralytics>=8.4.96`). Deploy edilen `models/best.pt` bir YOLOv8m (C2f blokları içeren) checkpoint'i olduğu için Ultralytics 8.2.x ile yüklenemez; Ultralytics'in daha yeni bir torch/numpy çekmesine izin vermeyin — Streamlit 1.35 ve scipy 1.13 `numpy<2` gerektirir. Ayrıntılar `requirements.txt` içindeki yorumlarda.
 
 Eğitilmiş ağırlık (`models/best.pt`) yoksa panel demo modunda (sentetik tespitlerle) çalışmaya devam eder; hata fırlatmaz ama gerçek tespit yapmaz.
