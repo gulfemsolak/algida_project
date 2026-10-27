@@ -1,4 +1,4 @@
-path: /private/var/folders/8k/597xttkx6yzd6c0yfyv2wdrw0000gn/T/pytest-of-gulfemsolak/pytest-8/test_build_dataset_yaml_genera0/splits
+path: /private/var/folders/bx/xwpd__nj3jjbq3x6vgbhmlwr0000gn/T/pytest-of-ufukmac/pytest-45/test_build_dataset_yaml_genera0/splits
 train: images/train
 val: images/val
 test: images/test

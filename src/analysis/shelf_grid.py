@@ -261,6 +261,8 @@ def estimate_grid(
     column_count: int,
     *,
     corners_override: np.ndarray | list[tuple[float, float]] | None = None,
+    corners_in_tray_order: bool = False,
+    corners_source: str = "manuel",
 ) -> dict[str, Any]:
     """KANONİK görüntüden tepsi köşelerini bul → homografi → ızgara.
 
@@ -273,13 +275,20 @@ def estimate_grid(
         corners_override: operatörün elle işaretlediği 4 köşe
             ``[(x,y), (x,y), (x,y), (x,y)]`` — verilirse doğrudan kullanılır
             (sıra önemli değil, ``_order_corners`` düzeltir).
+        corners_in_tray_order: True → köşeler ZATEN tepsiye göre sıralı
+            (sol üst, sağ üst, sağ alt, sol alt; "üst" = QR'lı metal bar tarafı).
+            ``_order_corners`` görüntü konumuna göre sıralar; tepsi yan çekilmiş
+            fotoğrafta kanalları gerçek kanallara DİK çizer. Köşe modeli tepsi
+            sırasını bildiği için bu yeniden sıralama atlanır.
+        corners_source: ``grid_source`` alanına yazılacak köken etiketi.
     """
     column_count = max(1, int(column_count))
 
     if corners_override is not None:
-        corners = _order_corners(np.asarray(corners_override, dtype=np.float32))
-        log.info("ızgara çapası: manuel köşeler")
-        return _build_grid(corners, column_count, grid_source="manuel")
+        pts = np.asarray(corners_override, dtype=np.float32).reshape(4, 2)
+        corners = pts if corners_in_tray_order else _order_corners(pts)
+        log.info("ızgara çapası: %s köşeler", corners_source)
+        return _build_grid(corners, column_count, grid_source=corners_source)
 
     if image is None:
         return _uncertain_grid(column_count, "görüntü yok")

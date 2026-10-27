@@ -67,6 +67,9 @@ def _kanal_item(slot: dict[str, Any]) -> dict[str, Any]:
         "kanal_kodu": slot["slot_id"],
         "durum": "dolu",
         "urunler": [{"ad": b["category"], "adet": b["count"]} for b in breakdown],
+        # Kanalın baskın ürününe ait kutuların ortalama tespit güveni (0-1). Ürün TANIMA
+        # güvenidir, adet doğruluğu değil; düşük çıkan kanal "ürün adına bak" demektir.
+        "guven": slot.get("confidence"),
     }
 
 

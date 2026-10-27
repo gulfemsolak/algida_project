@@ -86,9 +86,11 @@ inference:
   # Explicit path to the deployed weights. The dashboard loads exactly this file
   # (no size/heuristic auto-discovery). If it is missing the app surfaces an
   # error rather than silently falling back to demo detections.
+  # Ürün modeli. models/urun_v2.pt (09.10.2026 yeniden eğitimi, 1280 px) ölçüldü ve eskisinden
+  # belirgin iyi ÇIKMADI (farklar 1-3 paket, yönü teste göre değişiyor) → canlıda eski model.
   weights_path: "models/best.pt"
   conf_threshold: 0.5    # single global confidence cutoff for ALL classes
-  iou_threshold: 0.45
+  iou_threshold: 0.5         # NMS örtüşme eşiği; ölçümle seçildi (bkz. predictor.predict_shelf)
   max_det: 300
   device: ""            # "" = auto-select (CUDA if available, else CPU)
 
@@ -110,6 +112,19 @@ slot_analysis:
   # ── Yönelim ── yalnız EXIF Orientation'a göre 90° katı döndürme; içerik tabanlı
   # tahmin yok. Kalan perspektif shelf_grid homografisiyle (tepsi 4 köşesi) düzeltilir.
   auto_rotate: true          # EXIF varsa uygula; false = hiç döndürme (teşhis/karşılaştırma için)
+
+# ── Tepsi köşe modeli ── (src/analysis/tray_corner_model.py)
+# Açıkken sayım motoru köşe gelmeyen isteklerde tepsinin 4 köşesini bu modelle bulur ve
+# kanalları köşelerden çizer. Emin değilse eski yönteme (ürün dizilişi) döner.
+# Geri dönüş: enabled: false — ürün modeli (models/best.pt) bundan etkilenmez.
+tray_corner_model:
+  enabled: false
+  weights_path: "models/tray_corners.pt"
+  min_box_conf: 0.50
+  min_kpt_conf: 0.50
+  min_area_frac: 0.15
+  max_side_ratio: 2.0
+  refine_with_products: true   # kalan köşe kaymasını ürün sütunlarına göre düzelt (±0.4 kanal)
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 paths:

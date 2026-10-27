@@ -1261,6 +1261,8 @@ def estimate_grid_lane_based(
     expected_column_count: int | None = None,
     manual_extend_direction: str | None = None,
     manual_extend_count: int = 0,
+    corners_in_tray_order: bool = False,
+    corners_source: str = "manuel",
 ) -> dict[str, Any]:
     """Slot ızgarasını kimlikten bağımsız faz-hizalı LATİS ile üret (PRIMARY yol).
     Operatörün elle işaretlediği köşeler (``corners_override``) tek istisna: tam
@@ -1281,8 +1283,11 @@ def estimate_grid_lane_based(
     ``direction=None`` (varsayılan) → davranış DEĞİŞMEZ.
     """
     if corners_override is not None:
-        grid = estimate_homography_grid(image, column_count, corners_override=corners_override)
-        grid["lane_meta"] = {"kaynak": "manuel", "n_chains": None}
+        grid = estimate_homography_grid(
+            image, column_count, corners_override=corners_override,
+            corners_in_tray_order=corners_in_tray_order, corners_source=corners_source,
+        )
+        grid["lane_meta"] = {"kaynak": corners_source, "n_chains": None}
         return grid
 
     grid, _meta = _lane_grid(detections, column_count, empty_class_name, image,

@@ -77,6 +77,7 @@ def run_detection(
     image: np.ndarray,
     conf_threshold: float,
     imgsz: int | None = None,
+    iou: float | None = None,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     """Run YOLO on one BGR image; return ``(detections, class_names)``.
 
@@ -91,6 +92,8 @@ def run_detection(
     kwargs: dict[str, Any] = {"conf": conf_threshold, "verbose": False}
     if imgsz is not None:
         kwargs["imgsz"] = imgsz
+    if iou is not None:
+        kwargs["iou"] = iou
     # empty_slot recall is catastrophic (~0.12-0.21) — the class is dropped at
     # inference time entirely; downstream (slot_assigner) infers "no product
     # detected" from the lattice instead. Filtered by name, not a hardcoded
@@ -111,7 +114,39 @@ def run_detection(
                 "confidence": round(conf, 4),
                 "bbox": [round(x1), round(y1), round(x2), round(y2)],
             })
-    return detections, class_names
+    return _drop_cross_class_duplicates(detections), class_names
+
+
+CROSS_CLASS_DUP_IOU = 0.70
+
+
+def _iou(a: list[float], b: list[float]) -> float:
+    ix = max(0.0, min(a[2], b[2]) - max(a[0], b[0]))
+    iy = max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
+    inter = ix * iy
+    union = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter
+    return inter / union if union > 0 else 0.0
+
+
+def _drop_cross_class_duplicates(detections: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Aynı paketin iki farklı sınıfla iki kez sayılmasını önle.
+
+    YOLO'nun NMS'i sınıf başınadır: model bir paketi hem ``frigola_klasik`` hem
+    ``algida_klasik_cikolata`` diye bulursa ikisi de kalır ve kanal sayımı +1 çıkar.
+    Ölçüldü (106 foto, 08.10.2026): farklı sınıflı örtüşen 29 çiftin hepsi IoU ≥ 0.93
+    (aynı paket); aynı sınıfın gerçek komşu paketleri (spiralde üst üste) IoU 0.31-0.41.
+    Bu yüzden yalnız FARKLI sınıflı ve IoU ≥ ``CROSS_CLASS_DUP_IOU`` olan çiftte düşük
+    güvenli olan atılır; aynı sınıftaki komşulara dokunulmaz.
+    """
+    order = sorted(range(len(detections)), key=lambda i: -detections[i]["confidence"])
+    kept: list[dict[str, Any]] = []
+    for i in order:
+        d = detections[i]
+        if any(k["category"] != d["category"] and _iou(k["bbox"], d["bbox"]) >= CROSS_CLASS_DUP_IOU
+               for k in kept):
+            continue
+        kept.append(d)
+    return kept
 
 
 def _demo_result(image: np.ndarray, class_names: list[str]) -> list[dict[str, Any]]:
@@ -242,8 +277,12 @@ def predict_shelf(
 
         # Trust the checkpoint's own class names — config.yaml's list can
         # belong to a different training run and silently mislabel IDs.
+        # config.inference.iou_threshold eskiden HİÇ okunmuyordu (kütüphane varsayılanı 0.7
+        # kullanılıyordu) → aynı pakete iki kutu kalıyordu. Ölçüldü (09.10.2026, 39 etiketli
+        # raf, kanal adedi): 0.7 → 0.5 iki modelde de hatayı azalttı; 0.45 yeni modelde kötüleşti.
         raw_detections, class_names = run_detection(
-            model, image, conf_threshold, imgsz=imgsz
+            model, image, conf_threshold, imgsz=imgsz,
+            iou=cfg.get("inference", {}).get("iou_threshold"),
         )
 
     # Trim by the global confidence cutoff and build the summary.
